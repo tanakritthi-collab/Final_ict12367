@@ -91,8 +91,7 @@
                             </span>
                         </li>
                         <li class="nav-item">
-                            <!-- เปลี่ยนเป็นยิงไปที่ /admin/logout/ หรือช่องทางมาตรฐานของ Django แทน -->
-                            <form action="/admin/logout/" method="post" class="d-inline">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn nav-link text-danger fw-bold border-0 bg-transparent">
                                     ออกจากระบบ
@@ -110,6 +109,17 @@
             </div>
         </div>
     </nav>
+
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     {% block content %}{% endblock %}
 
