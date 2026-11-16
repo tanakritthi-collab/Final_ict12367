@@ -1,0 +1,301 @@
+{% extends 'booking/base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row g-4 justify-content-center">
+        
+        <!-- ฝั่งซ้าย: ตารางเช็กสนามว่าง -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-dark text-white py-3 border-bottom border-info border-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-uppercase">
+                        <i class="bi bi-grid-3x3-gap-fill me-2 text-info"></i> ตารางเช็กสนามว่าง
+                    </h5>
+                    <span class="badge bg-info text-dark fw-bold" id="selectedDateBadge">วันนี้</span>
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">คลิกที่ปุ่ม <span class="badge bg-success">ว่าง</span> เพื่อเลือกสนามและเวลาอัตโนมัติ</small>
+                        <div>
+                            <span class="badge bg-success me-1">ว่าง</span>
+                            <span class="badge bg-danger">เต็มแล้ว</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center align-middle mb-0" style="font-size: 0.85rem;">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 24%;">รอบเวลา</th>
+                                    <th>COURT 1</th>
+                                    <th>COURT 2</th>
+                                    <th>COURT 3</th>
+                                    <th>COURT 4</th>
+                                </tr>
+                            </thead>
+                            <tbody id="availabilityTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ฝั่งขวา: ฟอร์มจองสนาม -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-dark text-white py-3 border-bottom border-info border-4">
+                    <h5 class="mb-0 fw-bold text-uppercase">
+                        <i class="bi bi-calendar-plus me-2 text-info"></i>
+                        {% if booking %}แก้ไขข้อมูลการจอง{% else %}แบบฟอร์มจองสนาม{% endif %}
+                    </h5>
+                </div>
+
+                <div class="card-body p-4 bg-white">
+                    
+                    {% if error %}
+                    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                        <div>
+                            <strong class="d-block">จองสนามไม่สำเร็จ!</strong>
+                            {{ error }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- ช่อง Username -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-uppercase small text-info">ชื่อผู้ใช้งาน (USER / USERNAME)</label>
+                            <input type="text" name="username" class="form-control form-control-lg border-2 bg-light" 
+                                   value="{{ user.username }}" readonly>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-uppercase small">เบอร์โทรศัพท์ติดต่อ</label>
+                                <input type="text" name="phone" class="form-control form-control-lg border-2" 
+                                       placeholder="08X-XXX-XXXX" 
+                                       value="{% if booking %}{{ booking.phone_number }}{% else %}{{ data.phone }}{% endif %}" required>
+                            </div>
+                        </div>
+
+                        <hr class="my-3 text-muted opacity-25">
+
+                        <!-- Venue และ Court -->
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-uppercase small text-info">เลือกสถานที่ (VENUE)</label>
+                                <select name="venue" class="form-select form-select-lg border-2 border-info-subtle bg-light">
+                                    <option value="มหาวิทยาลัยศรีปทุม" selected>มหาวิทยาลัยศรีปทุม</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-uppercase small text-info">เลือกสนาม (COURT)</label>
+                                <select name="court" id="courtSelect" class="form-select form-select-lg border-2 border-info-subtle">
+                                    <option value="1" {% if booking.court_number == "1" or data.court == "1" %}selected{% endif %}>COURT 1 (สนาม 1)</option>
+                                    <option value="2" {% if booking.court_number == "2" or data.court == "2" %}selected{% endif %}>COURT 2 (สนาม 2)</option>
+                                    <option value="3" {% if booking.court_number == "3" or data.court == "3" %}selected{% endif %}>COURT 3 (สนาม 3)</option>
+                                    <option value="4" {% if booking.court_number == "4" or data.court == "4" %}selected{% endif %}>COURT 4 (สนาม 4)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- วันที่ต้องการเข้าเล่น -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-uppercase small text-info">
+                                <i class="bi bi-calendar-event me-1"></i> วันที่ต้องการเข้าเล่น (ล่วงหน้า 7 วัน)
+                            </label>
+                            <select name="date" id="bookingDateSelect" class="form-select form-select-lg border-2 border-info-subtle" onchange="renderAvailabilityTable()" required>
+                                {% if booking %}
+                                    <option value="{{ booking.booking_date|date:'Y-m-d' }}" selected>{{ booking.booking_date|date:'d/m/Y' }} (วันเดิม)</option>
+                                {% endif %}
+                                {% for d in date_options %}
+                                    <option value="{{ d.value }}" {% if data.date == d.value %}selected{% endif %}>{{ d.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- รอบเวลาที่ต้องการเข้าเล่น -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-uppercase small text-info">
+                                <i class="bi bi-clock-fill me-1"></i> รอบเวลาที่ต้องการเข้าเล่น
+                            </label>
+                            <select id="timeSlot" class="form-select form-select-lg border-2" onchange="splitTimeSlot()" required>
+                                <option value="" disabled selected>-- เลือกรอบเวลาที่ต้องการเข้าเล่น --</option>
+                                <option value="09:00-10:30">09:00 - 10:30 น. (รอบเช้า 1)</option>
+                                <option value="10:30-12:00">10:30 - 12:00 น. (รอบเช้า 2)</option>
+                                <option value="13:00-14:30">13:00 - 14:30 น. (รอบบ่าย 1)</option>
+                                <option value="14:30-16:00">14:30 - 16:00 น. (รอบบ่าย 2)</option>
+                                <option value="16:00-17:30">16:00 - 17:30 น. (รอบเย็น 1)</option>
+                                <option value="18:00-19:30">18:00 - 19:30 น. (รอบเย็น 2)</option>
+                            </select>
+
+                            <input type="hidden" name="start" id="startHidden">
+                            <input type="hidden" name="end" id="endHidden">
+                        </div>
+
+                        <!-- ระบบเลือกจำนวนอุปกรณ์เสริม (+ / -) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-uppercase small text-dark mb-2">
+                                <i class="bi bi-bag-plus-fill text-info me-1"></i> เช่าอุปกรณ์เสริม (เลือกจำนวน)
+                            </label>
+                            
+                            <!-- เปลี่ยนเป็นไม้แบดมินตัน -->
+                            <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded-3 bg-light border">
+                                <div>
+                                    <div class="fw-bold small">ไม้แบดมินตัน</div>
+                                    <small class="text-muted" style="font-size: 0.75rem;">60 บาท / คู่</small>
+                                </div>
+                                <div class="input-group input-group-sm" style="width: 120px;">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="updateQty('racket', -1)">-</button>
+                                    <input type="text" id="racket_qty_display" class="form-control text-center fw-bold bg-white" value="0" readonly>
+                                    <input type="hidden" name="shoes_qty" id="shoes_qty" value="0">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="updateQty('racket', 1)">+</button>
+                                </div>
+                            </div>
+
+                            <!-- ลูกแบดมินตัน -->
+                            <div class="d-flex justify-content-between align-items-center p-2 mb-3 rounded-3 bg-light border">
+                                <div>
+                                    <div class="fw-bold small">ลูกแบดมินตัน</div>
+                                    <small class="text-muted" style="font-size: 0.75rem;">40 บาท / 4 ลูก</small>
+                                </div>
+                                <div class="input-group input-group-sm" style="width: 120px;">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="updateQty('shuttle', -1)">-</button>
+                                    <input type="text" id="shuttle_qty_display" class="form-control text-center fw-bold bg-white" value="0" readonly>
+                                    <input type="hidden" name="shuttle_qty" id="shuttle_qty" value="0">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="updateQty('shuttle', 1)">+</button>
+                                </div>
+                            </div>
+
+                            <!-- สรุปราคารวม -->
+                            <div class="p-3 rounded-3 bg-light border border-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="small text-muted fw-bold">สรุปยอดชำระทั้งหมด</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;" id="priceBreakdownText">ค่าสนาม (150 ฿) + อุปกรณ์เสริม (0 ฿)</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fs-4 fw-bold text-success" id="totalPriceDisplay">150</span>
+                                    <span class="fw-bold text-dark small">บาท</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 pt-1">
+                            <button type="submit" class="btn btn-dark btn-lg py-3 fw-bold text-uppercase shadow">
+                                <i class="bi bi-check-circle-fill me-2 text-info"></i> ยืนยันข้อมูลการจอง
+                            </button>
+                            <a href="{% url 'index' %}" class="btn btn-link text-decoration-none text-muted mt-1">
+                                <i class="bi bi-arrow-left"></i> กลับไปหน้าหลัก
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const bookedSlots = {{ booked_slots_json|safe }};
+    const allSlots = [
+        { value: '09:00-10:30', label: '09:00 - 10:30', start: '09:00', end: '10:30' },
+        { value: '10:30-12:00', label: '10:30 - 12:00', start: '10:30', end: '12:00' },
+        { value: '13:00-14:30', label: '13:00 - 14:30', start: '13:00', end: '14:30' },
+        { value: '14:30-16:00', label: '14:30 - 16:00', start: '14:30', end: '16:00' },
+        { value: '16:00-17:30', label: '16:00 - 17:30', start: '16:00', end: '17:30' },
+        { value: '18:00-19:30', label: '18:00 - 19:30', start: '18:00', end: '19:30' }
+    ];
+
+    function renderAvailabilityTable() {
+        const dateSelect = document.getElementById('bookingDateSelect');
+        const selectedDate = dateSelect.value;
+        const selectedText = dateSelect.options[dateSelect.selectedIndex].text;
+        document.getElementById('selectedDateBadge').innerText = selectedText;
+
+        const tbody = document.getElementById('availabilityTableBody');
+        tbody.innerHTML = '';
+
+        allSlots.forEach(slot => {
+            let rowHtml = `<tr><td class="fw-bold bg-light text-dark">${slot.label}</td>`;
+            for (let court = 1; court <= 4; court++) {
+                const isTaken = bookedSlots.some(b => 
+                    b.date === selectedDate && b.court === String(court) && b.start < slot.end && b.end > slot.start
+                );
+                if (isTaken) {
+                    rowHtml += `<td><span class="badge bg-danger w-100 py-2">เต็มแล้ว</span></td>`;
+                } else {
+                    rowHtml += `<td><button type="button" class="btn btn-success btn-sm w-100 fw-bold" onclick="quickSelectSlot('${court}', '${slot.value}')">ว่าง</button></td>`;
+                }
+            }
+            rowHtml += `</tr>`;
+            tbody.innerHTML += rowHtml;
+        });
+    }
+
+    function quickSelectSlot(courtNum, slotVal) {
+        document.getElementById('courtSelect').value = courtNum;
+        document.getElementById('timeSlot').value = slotVal;
+        splitTimeSlot();
+    }
+
+    function splitTimeSlot() {
+        const slot = document.getElementById('timeSlot').value;
+        if (slot && slot.includes('-')) {
+            const parts = slot.split('-');
+            document.getElementById('startHidden').value = parts[0];
+            document.getElementById('endHidden').value = parts[1];
+        }
+    }
+
+    function updateQty(type, change) {
+        if (type === 'racket') {
+            let qtyInput = document.getElementById('shoes_qty');
+            let display = document.getElementById('racket_qty_display');
+            let current = parseInt(qtyInput.value) || 0;
+            let newVal = current + change;
+            if (newVal >= 0) {
+                qtyInput.value = newVal;
+                display.value = newVal;
+            }
+        } else if (type === 'shuttle') {
+            let qtyInput = document.getElementById('shuttle_qty');
+            let display = document.getElementById('shuttle_qty_display');
+            let current = parseInt(qtyInput.value) || 0;
+            let newVal = current + change;
+            if (newVal >= 0) {
+                qtyInput.value = newVal;
+                display.value = newVal;
+            }
+        }
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        const basePrice = 150;
+        let shoesQty = parseInt(document.getElementById('shoes_qty').value) || 0;
+        let shuttleQty = parseInt(document.getElementById('shuttle_qty').value) || 0;
+
+        let shoesPrice = shoesQty * 60;
+        let shuttlePrice = shuttleQty * 40;
+        let extraPrice = shoesPrice + shuttlePrice;
+
+        document.getElementById('totalPriceDisplay').innerText = basePrice + extraPrice;
+        
+        let breakdown = `ค่าสนาม (${basePrice} ฿)`;
+        if (shoesQty > 0) breakdown += ` + ไม้แบด ${shoesQty} คู่ (${shoesPrice} ฿)`;
+        if (shuttleQty > 0) breakdown += ` + ลูกแบด ${shuttleQty * 4} ลูก (${shuttlePrice} ฿)`;
+        
+        document.getElementById('priceBreakdownText').innerText = breakdown;
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+        splitTimeSlot();
+        renderAvailabilityTable();
+        calculateTotal();
+    });
+</script>
+{% endblock %}

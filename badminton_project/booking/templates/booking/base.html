@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BADMINTON ARENA | ระบบจองสนามแบดมินตัน</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%230f172a'/><text y='.9em' x='12' font-size='70'>🏸</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --court-green: #0ea5e9; 
+            --sport-navy: #1a252f;
+            --shuttle-white: #ffffff;
+        }
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f4f7f6;
+        }
+        .navbar {
+            background-color: var(--sport-navy);
+            border-bottom: 5px solid var(--court-green);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--court-green) !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .nav-link {
+            font-weight: 500;
+            margin-left: 20px;
+        }
+        .footer {
+            background-color: var(--sport-navy);
+            color: #95a5a6;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 5px solid var(--court-green);
+        }
+        .footer a {
+            color: #95a5a6;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .footer a:hover {
+            color: var(--court-green);
+            text-decoration: underline;
+        }
+        .btn-sport {
+            background-color: var(--court-green);
+            color: white;
+            font-weight: 600;
+            border-radius: 0;
+            padding: 12px 30px;
+            transition: 0.3s;
+        }
+        .btn-sport:hover {
+            background-color: #0284c7;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="bi bi-lightning-fill"></i> BADMINTON ARENA
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto text-uppercase align-items-center">
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'index' %}">หน้าแรก</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'create_booking' %}">จองสนาม</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'contact' %}">ติดต่อเรา</a></li>
+
+                    {% if user.is_authenticated %}
+                        <li class="nav-item ms-lg-3">
+                            <span class="badge bg-info text-dark p-2">
+                                <i class="bi bi-person-circle"></i> {{ user.username }} 
+                                {% if user.is_staff %}(ADMIN){% endif %}
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <!-- เปลี่ยนเป็นยิงไปที่ /admin/logout/ หรือช่องทางมาตรฐานของ Django แทน -->
+                            <form action="/admin/logout/" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn nav-link text-danger fw-bold border-0 bg-transparent">
+                                    ออกจากระบบ
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item ms-lg-3">
+                            <a class="btn btn-outline-info btn-sm text-white px-3" href="/admin/login/">
+                                <i class="bi bi-lock-fill"></i> เข้าสู่ระบบ
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer text-center">
+        <div class="container">
+            <h4 class="text-white fw-bold mb-3">ICT12367 BADMINTON CLUB</h4>
+            <p class="mb-3">เปิดให้บริการทุกวัน 24 HR  สนามมาตรฐาน 100%</p>
+            <div class="small">
+                <p class="mb-1">พัฒนาโดย</p>
+                <p class="mb-1"><a href="https://www.instagram.com/replayy_p/" target="_blank" rel="noopener noreferrer">68090902 ภูมิอนันต์ จะวะนะ</a></p>
+                <p class="mb-1"><a href="https://www.instagram.com/t1e_kun9/" target="_blank" rel="noopener noreferrer">68082011 ธนกฤต ทิพวัฒน์</a></p>
+                <p class="mb-0"><a href="https://www.instagram.com/kampol_game/" target="_blank" rel="noopener noreferrer">68095394 กัมพล พรธัญกิจ</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

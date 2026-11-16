@@ -1,0 +1,166 @@
+{% extends 'booking/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-7 col-lg-5">
+            <div class="card border-0 shadow-lg overflow-hidden rounded-4">
+                
+                <!-- ส่วนหัวการ์ด -->
+                <div class="card-header text-center text-white py-4 border-0" style="background: linear-gradient(135deg, #1a252f 0%, #0f172a 100%); border-bottom: 4px solid #0ea5e9 !important;">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width: 56px; height: 56px; background-color: rgba(14, 165, 233, 0.15); border: 2px solid #0ea5e9;">
+                        <i class="bi bi-person-badge-fill fs-2" style="color: #0ea5e9;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1 text-uppercase" style="letter-spacing: 1.5px;">สมาชิก & ผู้ดูแลระบบ</h4>
+                    <p class="small text-white-50 mb-0">BADMINTON ARENA | เข้าสู่ระบบหรือสมัครสมาชิกใหม่</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5 bg-white">
+                    
+                    <!-- แสดงข้อความแจ้งเตือนกรณีล็อกอินหรือสมัครไม่ผ่าน -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center rounded-3 mb-4" role="alert">
+                            <i class="bi bi-exclamation-circle-fill fs-5 me-2"></i>
+                            <div class="small">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</div>
+                        </div>
+                    {% endif %}
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if 'error' in message.tags %}
+                                <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center rounded-3 mb-4" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                                    <div class="small">{{ message }}</div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- ส่วนบน: ฟอร์มเข้าสู่ระบบ (ใช้ได้ทั้งลูกค้าและ Admin) -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase mb-3 d-flex align-items-center" style="color: #0ea5e9;">
+                            <i class="bi bi-box-arrow-in-right me-2 fs-5"></i> เข้าสู่ระบบ (ลูกค้า / Admin)
+                        </h6>
+                        <form method="post" action="{% url 'login_user' %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-info">
+                                        <i class="bi bi-person-fill"></i>
+                                    </span>
+                                    <input type="text" name="username" class="form-control bg-light border-start-0 ps-0 custom-login-input" placeholder="ชื่อผู้ใช้งาน (Username)" required autofocus>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-info">
+                                        <i class="bi bi-key-fill"></i>
+                                    </span>
+                                    <input type="password" name="password" class="form-control bg-light border-start-0 ps-0 custom-login-input" placeholder="รหัสผ่าน (Password)" required>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn text-white fw-bold text-uppercase py-2 rounded-3 shadow-sm btn-login-custom">
+                                    เข้าสู่ระบบ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- เส้นคั่นกลาง -->
+                    <div class="position-relative my-4">
+                        <hr class="text-muted">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small fw-bold">
+                            หรือ ยังไม่มีบัญชี?
+                        </span>
+                    </div>
+
+                    <!-- ส่วนล่าง: ฟอร์มสมัครสมาชิกสำหรับลูกค้าใหม่ -->
+                    <div>
+                        <h6 class="fw-bold text-uppercase mb-3 d-flex align-items-center text-dark">
+                            <i class="bi bi-person-plus-fill me-2 fs-5 text-info"></i> สมัครสมาชิกใหม่ (สำหรับลูกค้า)
+                        </h6>
+                        <form method="post" action="{% url 'register' %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-secondary">
+                                        <i class="bi bi-person-plus"></i>
+                                    </span>
+                                    <input type="text" name="reg_username" class="form-control bg-light border-start-0 ps-0 custom-login-input" placeholder="ตั้งชื่อผู้ใช้งาน (Username)" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-secondary">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input type="password" name="reg_password" class="form-control bg-light border-start-0 ps-0 custom-login-input" placeholder="ตั้งรหัสผ่าน (Password)" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-secondary">
+                                        <i class="bi bi-check2-circle"></i>
+                                    </span>
+                                    <input type="password" name="reg_confirm_password" class="form-control bg-light border-start-0 ps-0 custom-login-input" placeholder="ยืนยันรหัสผ่านอีกครั้ง" required>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-dark fw-bold text-uppercase py-2 rounded-3 shadow-sm btn-register-custom">
+                                    สมัครสมาชิก & เข้าใช้งานทันที
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <a href="{% url 'index' %}" class="text-decoration-none small text-muted hover-blue">
+                            <i class="bi bi-arrow-left me-1"></i> กลับไปหน้าหลัก
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-login-input:focus {
+        background-color: #ffffff !important;
+        box-shadow: none;
+        border-color: #dee2e6;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.2);
+        border-radius: 0.375rem;
+    }
+    .btn-login-custom {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-login-custom:hover {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        transform: translateY(-2px);
+    }
+    .btn-register-custom {
+        transition: all 0.3s ease;
+    }
+    .btn-register-custom:hover {
+        background-color: #0f172a;
+        transform: translateY(-2px);
+    }
+    .hover-blue:hover {
+        color: #0ea5e9 !important;
+    }
+</style>
+{% endblock %}
