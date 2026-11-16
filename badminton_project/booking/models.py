@@ -15,7 +15,6 @@ class CourtBooking(models.Model):
 
     class Meta:
         db_table = 'CourtBookings'
-        # ถ้าอยู่บน Render ให้สร้างตารางอัตโนมัติ (True) แต่ถ้าอยู่ในเครื่องให้ใช้ตารางเดิมใน SSMS (False)
         managed = 'DATABASE_URL' in os.environ
 
     def __str__(self):
