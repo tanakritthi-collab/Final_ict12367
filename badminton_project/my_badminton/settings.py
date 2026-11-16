@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
-#import dj_database_url
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,12 +75,6 @@ WSGI_APPLICATION = 'my_badminton.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-import os
-import dj_database_url
-
-# ... (โค้ดส่วนอื่นเหมือนเดิม) ...
-
-# ตรวจสอบว่ากำลังรันอยู่บน Render หรือไม่
 if 'DATABASE_URL' in os.environ:
     # กรณีรันบน Render (ใช้ PostgreSQL บน Cloud)
     DATABASES = {
@@ -102,6 +97,7 @@ else:
             },
         }
     }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
