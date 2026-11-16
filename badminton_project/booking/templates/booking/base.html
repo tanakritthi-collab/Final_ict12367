@@ -91,7 +91,7 @@
                             </span>
                         </li>
                         <li class="nav-item">
-                            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                            <form action="/logout/" method="post" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn nav-link text-danger fw-bold border-0 bg-transparent">
                                     ออกจากระบบ
