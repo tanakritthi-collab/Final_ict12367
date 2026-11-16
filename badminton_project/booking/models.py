@@ -1,3 +1,4 @@
+import os
 from django.db import models
 
 class CourtBooking(models.Model):
@@ -14,7 +15,8 @@ class CourtBooking(models.Model):
 
     class Meta:
         db_table = 'CourtBookings'
-        managed = False
+        # ถ้าอยู่บน Render ให้สร้างตารางอัตโนมัติ (True) แต่ถ้าอยู่ในเครื่องให้ใช้ตารางเดิมใน SSMS (False)
+        managed = 'DATABASE_URL' in os.environ
 
     def __str__(self):
         return f"{self.customer_name} - {self.court_number}"
