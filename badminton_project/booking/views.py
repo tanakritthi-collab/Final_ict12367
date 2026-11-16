@@ -114,11 +114,11 @@ def get_booked_slots_json():
         })
     return json.dumps(booked_list)
 
-# 2. สร้างการจอง
+
 def create_booking(request):
     if not request.user.is_authenticated:
         messages.error(request, 'กรุณาล็อกอินก่อนจองสนาม')
-        return redirect('index')
+        return redirect('/admin/login/')
 
     all_customer_names = CourtBooking.objects.values_list('customer_name', flat=True).distinct()
     date_options = get_7_days_options()
